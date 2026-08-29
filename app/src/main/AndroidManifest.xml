@@ -5,7 +5,8 @@
     <application
         android:name=".GroceryB2BApp"
         android:allowBackup="false"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/ic_app_icon"
+        android:roundIcon="@drawable/ic_app_icon"
         android:label="@string/app_name"
         android:theme="@style/Theme.GroceryB2B"
         android:usesCleartextTraffic="true">
