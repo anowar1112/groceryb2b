@@ -91,6 +91,11 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    /** Prevents an already-handled navigation event from firing again after recreation. */
+    fun consumeNavigation() {
+        _uiState.update { it.copy(navigateToShopSetup = false, navigateToHome = false) }
+    }
+
     private fun startCooldown(seconds: Int) {
         cooldownJob?.cancel()
         cooldownJob = viewModelScope.launch {

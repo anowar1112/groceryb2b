@@ -36,6 +36,7 @@ dependencies {
     implementation(project(":core:core-network"))
     implementation(project(":core:core-ui"))
     implementation(project(":feature:auth"))
+    implementation(project(":feature:shop-setup"))
 
     implementation(libs.core.ktx)
     implementation(libs.activity.compose)

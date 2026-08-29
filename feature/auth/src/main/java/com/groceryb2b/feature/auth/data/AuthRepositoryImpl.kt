@@ -24,6 +24,7 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.accessToken = response.accessToken
             sessionManager.refreshToken = response.refreshToken
             sessionManager.shopId = response.shopId
+            sessionManager.mobileNumber = mobileNumber
             OtpVerifyResult(
                 accessToken = response.accessToken,
                 refreshToken = response.refreshToken,

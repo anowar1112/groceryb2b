@@ -6,15 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.groceryb2b.feature.auth"
+    namespace = "com.groceryb2b.feature.shopsetup"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    buildFeatures {
-        compose = true
-    }
+    defaultConfig { minSdk = libs.versions.minSdk.get().toInt() }
+    buildFeatures { compose = true }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -33,10 +29,8 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.navigation.compose)
-
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.retrofit)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-
-    implementation(libs.retrofit)
-    implementation(libs.kotlinx.coroutines.android)
 }

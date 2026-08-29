@@ -2,6 +2,7 @@ package com.groceryb2b.feature.auth.presentation
 
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -26,7 +27,11 @@ fun NavGraphBuilder.authGraph(
 ) {
     navigation(startDestination = AuthRoutes.LOGIN, route = AuthRoutes.GRAPH) {
         composable(AuthRoutes.LOGIN) { backStackEntry ->
-            val parentEntry = navController.getBackStackEntry(AuthRoutes.GRAPH)
+            // Keep the graph entry while Navigation finishes the exit animation after
+            // the graph has been removed from the active back stack.
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AuthRoutes.GRAPH)
+            }
             val viewModel: AuthViewModel = hiltViewModel(parentEntry)
             val state by viewModel.uiState.collectAsState()
 
@@ -36,8 +41,12 @@ fun NavGraphBuilder.authGraph(
                 navController.navigate(AuthRoutes.OTP)
             }
         }
-        composable(AuthRoutes.OTP) {
-            val parentEntry = navController.getBackStackEntry(AuthRoutes.GRAPH)
+        composable(AuthRoutes.OTP) { backStackEntry ->
+            // Do not look up auth_graph again during the outgoing composition: it may
+            // already have been popped when moving to Shop Setup or Home.
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(AuthRoutes.GRAPH)
+            }
             val viewModel: AuthViewModel = hiltViewModel(parentEntry)
 
             OtpScreen(

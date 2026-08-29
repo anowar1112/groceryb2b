@@ -1,7 +1,6 @@
 package com.groceryb2b.feature.auth.presentation
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,22 +31,34 @@ fun OtpScreen(
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(state.navigateToShopSetup) {
-        if (state.navigateToShopSetup) onNavigateToShopSetup()
+        if (state.navigateToShopSetup) {
+            viewModel.consumeNavigation()
+            onNavigateToShopSetup()
+        }
     }
     LaunchedEffect(state.navigateToHome) {
-        if (state.navigateToHome) onNavigateToHome()
+        if (state.navigateToHome) {
+            viewModel.consumeNavigation()
+            onNavigateToHome()
+        }
     }
 
     Scaffold { padding ->
         Column(modifier = Modifier.padding(padding).padding(24.dp).fillMaxSize()) {
             Text(
-                text = "OTP যাচাই করুন",
+                text = "মোবাইল নম্বর নিশ্চিত করুন",
                 style = MaterialTheme.typography.headlineSmall
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "${state.mobileNumber} নম্বরে পাঠানো ৬ সংখ্যার কোডটি দিন",
+                text = "${state.mobileNumber} নম্বরটি নিশ্চিত করতে ৬ সংখ্যার কোডটি দিন",
                 style = MaterialTheme.typography.bodyMedium
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "লোকাল MVP মোড: confirmation code 000000",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.tertiary
             )
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -63,22 +73,6 @@ fun OtpScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
             ErrorText(state.errorMessage)
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(modifier = Modifier.fillMaxWidth()) {
-                val resendText = if (state.resendCooldownSeconds > 0) {
-                    "আবার কোড পাঠান (${state.resendCooldownSeconds}s)"
-                } else {
-                    "আবার কোড পাঠান"
-                }
-                TextButton(
-                    onClick = viewModel::resendOtp,
-                    enabled = state.resendCooldownSeconds == 0
-                ) {
-                    Text(resendText)
-                }
-            }
-
             Spacer(modifier = Modifier.height(16.dp))
 
             PrimaryButton(

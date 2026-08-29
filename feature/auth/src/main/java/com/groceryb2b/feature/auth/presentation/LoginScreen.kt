@@ -35,7 +35,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "দোকান রেজিস্ট্রেশন বা লগইন করতে আপনার মোবাইল নম্বর দিন",
+                text = "এই ডিভাইসে আপনার দোকান খুঁজতে বা নতুন দোকান নিবন্ধন করতে মোবাইল নম্বর দিন",
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(24.dp))
@@ -54,7 +54,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             PrimaryButton(
-                text = "OTP পাঠান",
+                text = "চালিয়ে যান",
                 onClick = viewModel::requestOtp,
                 enabled = state.mobileNumber.length == 11,
                 isLoading = state.isLoading
