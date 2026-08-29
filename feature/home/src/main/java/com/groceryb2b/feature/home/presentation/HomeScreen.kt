@@ -37,11 +37,19 @@ import com.groceryb2b.core.ui.components.PrimaryButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onNavigateToCheckout: () -> Unit = {}) {
     val state by viewModel.uiState.collectAsState()
     val cartCount = state.quantities.values.sum()
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Grocery B2B") }, actions = { if (cartCount > 0) Text("কার্ট: $cartCount", modifier = Modifier.padding(end = 16.dp), style = MaterialTheme.typography.labelLarge) }) }
+        topBar = { TopAppBar(title = { Text("Grocery B2B") }, actions = { if (cartCount > 0) Text("কার্ট: $cartCount", modifier = Modifier.padding(end = 16.dp), style = MaterialTheme.typography.labelLarge) }) },
+        floatingActionButton = {
+            if (cartCount > 0) {
+                PrimaryButton(
+                    text = "চেকআউট ($cartCount)",
+                    onClick = onNavigateToCheckout
+                )
+            }
+        }
     ) { padding ->
         LazyColumn(modifier = Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             item {

@@ -14,6 +14,9 @@ interface ProductDao {
     @Query("SELECT EXISTS(SELECT 1 FROM products WHERE nameEn = :nameEn)")
     suspend fun existsByNameEn(nameEn: String): Boolean
 
+    @Query("SELECT * FROM products WHERE id = :id")
+    suspend fun getById(id: Long): ProductEntity?
+
     @Insert
     suspend fun insert(product: ProductEntity): Long
 }

@@ -40,6 +40,6 @@ fun AppNavHost() {
             }
         )
 
-        homeScreen()
+        homeScreen(navController)
     }
 }
