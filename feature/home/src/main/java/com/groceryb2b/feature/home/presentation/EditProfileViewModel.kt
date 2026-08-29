@@ -27,6 +27,8 @@ class EditProfileViewModel @Inject constructor(
     
     private val _uiState = MutableStateFlow<EditProfileUiState>(EditProfileUiState.Loading)
     val uiState: StateFlow<EditProfileUiState> = _uiState
+
+    private var currentShop: ShopEntity? = null
     
     private val _shopNameState = MutableStateFlow("")
     val shopNameState: StateFlow<String> = _shopNameState
@@ -51,6 +53,7 @@ class EditProfileViewModel @Inject constructor(
         try {
             val shop = shopDao.findByMobileNumber(sessionManager.mobileNumber.orEmpty())
             if (shop != null) {
+                currentShop = shop
                 _shopNameState.value = shop.shopName
                 _ownerNameState.value = shop.ownerName
                 _addressState.value = shop.address
@@ -58,6 +61,7 @@ class EditProfileViewModel @Inject constructor(
                 _landmarkState.value = shop.landmark.orEmpty()
                 _uiState.value = EditProfileUiState.Success(shop)
             } else {
+                currentShop = null
                 _uiState.value = EditProfileUiState.Error("দোকান খুঁজে পাওয়া যায়নি")
             }
         } catch (e: Exception) {
@@ -87,12 +91,14 @@ class EditProfileViewModel @Inject constructor(
     
     fun saveChanges() = viewModelScope.launch {
         try {
+            val shopToUpdate = currentShop ?: run {
+                _uiState.value = EditProfileUiState.Error("দোকানের তথ্য পাওয়া যায়নি")
+                return@launch
+            }
+
             _uiState.value = EditProfileUiState.Saving
-            
-            val currentShop = (uiState.value as? EditProfileUiState.Success)?.shop
-                ?: return@launch
-            
-            val updatedShop = currentShop.copy(
+
+            val updatedShop = shopToUpdate.copy(
                 shopName = _shopNameState.value,
                 ownerName = _ownerNameState.value,
                 address = _addressState.value,
@@ -100,8 +106,9 @@ class EditProfileViewModel @Inject constructor(
                 landmark = _landmarkState.value.ifEmpty { null },
                 updatedAtEpochMillis = System.currentTimeMillis()
             )
-            
+
             shopDao.update(updatedShop)
+            currentShop = updatedShop
             _uiState.value = EditProfileUiState.SaveSuccess
         } catch (e: Exception) {
             _uiState.value = EditProfileUiState.Error(e.message ?: "সংরক্ষণ ব্যর্থ হয়েছে")

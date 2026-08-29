@@ -41,7 +41,9 @@ fun NavGraphBuilder.homeScreen(navController: NavController) {
     composable(HomeRoutes.EDIT_PROFILE) {
         EditProfileScreen(
             onNavigateBack = { navController.popBackStack() },
-            onSaveSuccess = { navController.popBackStack() }
+            onSaveSuccess = {
+                navController.popBackStack(HomeRoutes.HOME, false)
+            }
         )
     }
     composable(HomeRoutes.ORDER_DETAILS) { backStackEntry ->
