@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AssistChip
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -37,11 +41,25 @@ import com.groceryb2b.core.ui.components.PrimaryButton
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onNavigateToCheckout: () -> Unit = {}) {
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    onNavigateToCheckout: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
+) {
     val state by viewModel.uiState.collectAsState()
     val cartCount = state.quantities.values.sum()
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Grocery B2B") }, actions = { if (cartCount > 0) Text("কার্ট: $cartCount", modifier = Modifier.padding(end = 16.dp), style = MaterialTheme.typography.labelLarge) }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Grocery B2B") },
+                actions = {
+                    if (cartCount > 0) Text("কার্ট: $cartCount", modifier = Modifier.padding(end = 8.dp), style = MaterialTheme.typography.labelLarge)
+                    IconButton(onClick = onNavigateToProfile) {
+                        Icon(Icons.Filled.Person, contentDescription = "Profile")
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             if (cartCount > 0) {
                 PrimaryButton(
@@ -61,9 +79,19 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel(), onNavigateToCheckout:
             }
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    item { AssistChip(onClick = { viewModel.selectCategory(null) }, label = { Text("সব") }, leadingIcon = if (state.selectedCategoryId == null) ({ Text("✓") }) else null) }
+                    item {
+                        FilterChip(
+                            selected = state.selectedCategoryId == null,
+                            onClick = { viewModel.selectCategory(null) },
+                            label = { Text("সব") }
+                        )
+                    }
                     items(state.categories, key = { it.id }) { category ->
-                        AssistChip(onClick = { viewModel.selectCategory(category.id) }, label = { Text(category.nameBn) }, leadingIcon = if (state.selectedCategoryId == category.id) ({ Text("✓") }) else null)
+                        FilterChip(
+                            selected = state.selectedCategoryId == category.id,
+                            onClick = { viewModel.selectCategory(category.id) },
+                            label = { Text(category.nameBn) }
+                        )
                     }
                 }
             }
