@@ -26,17 +26,16 @@ dependencies {
     implementation(project(":core:core-network"))
     implementation(project(":core:core-ui"))
 
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.00")
-    implementation(composeBom)
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.navigation:navigation-compose:2.7.7")
+    implementation(platform(libs.compose.bom))
+    implementation(libs.compose.ui)
+    implementation(libs.compose.material3)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.navigation.compose)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+    implementation(libs.retrofit)
+    implementation(libs.kotlinx.coroutines.android)
 }
