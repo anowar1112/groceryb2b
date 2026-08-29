@@ -6,10 +6,10 @@ plugins {
 
 android {
     namespace = "com.groceryb2b.core.network"
-    compileSdk = 37
+    compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 24
+        minSdk = libs.versions.minSdk.get().toInt()
         // Base URL is injected per build-type so staging/prod can point
         // to different backends without code changes.
         buildConfigField("String", "BASE_URL", "\"https://api.groceryb2b.example.com/\"")
