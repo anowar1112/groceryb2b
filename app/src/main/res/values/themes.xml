@@ -1,0 +1,3 @@
+<resources>
+    <style name="Theme.GroceryB2B" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
