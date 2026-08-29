@@ -1,10 +1,6 @@
 package com.groceryb2b.app
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,8 +8,9 @@ import com.groceryb2b.feature.auth.presentation.AuthRoutes
 import com.groceryb2b.feature.auth.presentation.authGraph
 import com.groceryb2b.feature.shopsetup.presentation.ShopSetupRoutes
 import com.groceryb2b.feature.shopsetup.presentation.shopSetupGraph
+import com.groceryb2b.feature.home.presentation.HomeRoutes
+import com.groceryb2b.feature.home.presentation.homeScreen
 
-private const val ROUTE_HOME_PLACEHOLDER = "home_placeholder"
 
 @Composable
 fun AppNavHost() {
@@ -28,7 +25,7 @@ fun AppNavHost() {
                 }
             },
             onAuthenticatedExistingShop = {
-                navController.navigate(ROUTE_HOME_PLACEHOLDER) {
+                navController.navigate(HomeRoutes.HOME) {
                     popUpTo(AuthRoutes.GRAPH) { inclusive = true }
                 }
             }
@@ -37,22 +34,12 @@ fun AppNavHost() {
         shopSetupGraph(
             navController = navController,
             onSetupCompleted = {
-                navController.navigate(ROUTE_HOME_PLACEHOLDER) {
+                navController.navigate(HomeRoutes.HOME) {
                     popUpTo(ShopSetupRoutes.GRAPH) { inclusive = true }
                 }
             }
         )
 
-        // TODO(step 3): replace with feature/home's real nav graph.
-        composable(ROUTE_HOME_PLACEHOLDER) {
-            HomePlaceholderScreen()
-        }
-    }
-}
-
-@Composable
-private fun HomePlaceholderScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        androidx.compose.material3.Text("Home — পরবর্তী ধাপে তৈরি হবে")
+        homeScreen()
     }
 }
