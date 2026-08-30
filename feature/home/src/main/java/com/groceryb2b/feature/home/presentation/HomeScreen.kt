@@ -2,9 +2,13 @@ package com.groceryb2b.feature.home.presentation
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,18 +28,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -108,7 +116,7 @@ fun HomeScreen(
                     },
                     onContactUsClick = {
                         scope.launch { drawerState.close() }
-                        onNavigateToContactUs()
+                        Toast.makeText(context, "আমাদের সাথে যোগাযোগ করুন: +৮৮০১৭XXXXXXXX", Toast.LENGTH_LONG).show()
                     },
                     onLogoutClick = {
                         scope.launch { drawerState.close() }
@@ -199,6 +207,8 @@ fun HomeScreen(
                         { viewModel.changeQuantity(product.id, -1) },
                         { viewModel.changeQuantity(product.id, 1) })
                 }
+                // Add spacer at bottom to ensure last item is visible above bottom bar
+                item { Spacer(Modifier.height(80.dp)) }
             }
         }
     }
@@ -409,50 +419,140 @@ private fun ProductCard(
     onDecrease: () -> Unit,
     onIncrease: () -> Unit
 ) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
         Column(
             Modifier
                 .fillMaxWidth()
                 .padding(16.dp)) {
-            Text(product.nameBn, style = MaterialTheme.typography.titleMedium)
-            Text("${product.brand} • ${product.unit}", style = MaterialTheme.typography.bodyMedium)
-            Spacer(Modifier.height(8.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "৳${product.price}",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = product.nameBn,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "${product.brand} • ${product.unit}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
                 if (product.discountPercent > 0) {
-                    Spacer(Modifier.width(8.dp)); Text(
-                    "${product.discountPercent}% ছাড়",
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.labelLarge
-                )
+                    Box(
+                        modifier = Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.errorContainer,
+                                shape = RoundedCornerShape(4.dp)
+                            )
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = "${product.discountPercent}% ছাড়",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
-            Text(
-                if (product.stock > 0) "স্টক আছে: ${product.stock}" else "স্টক নেই",
-                color = if (product.stock > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium
-            )
-            HorizontalDivider(Modifier.padding(vertical = 10.dp))
-            if (quantity == 0) PrimaryButton(
-                "কার্টে যোগ করুন",
-                onIncrease,
-                enabled = product.stock > 0
-            ) else Row(
-                verticalAlignment = Alignment.CenterVertically,
+            
+            Spacer(Modifier.height(12.dp))
+
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(onClick = onDecrease, modifier = Modifier.width(72.dp)) { Text("−") }
-                Text("$quantity", style = MaterialTheme.typography.titleLarge)
-                Button(
-                    onClick = onIncrease,
-                    modifier = Modifier.width(72.dp),
-                    enabled = quantity < product.stock
-                ) { Text("+") }
+                Column {
+                    Text(
+                        text = "৳${product.price}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = if (product.stock > 0) "স্টক: ${product.stock}, ${product.unit}" else "স্টক নেই",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (product.stock > 0) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error
+                    )
+                }
+
+                // Modern Add to Cart / Quantity Selector
+                Box(
+                    modifier = Modifier.height(40.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    if (quantity == 0) {
+                        Button(
+                            onClick = onIncrease,
+                            enabled = product.stock > 0,
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.height(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text("যোগ করুন", style = MaterialTheme.typography.labelLarge)
+                        }
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = onDecrease,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Remove,
+                                    contentDescription = "Decrease",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            
+                            Text(
+                                text = "$quantity",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 12.dp),
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            
+                            IconButton(
+                                onClick = onIncrease,
+                                enabled = quantity < product.stock,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Increase",
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }
