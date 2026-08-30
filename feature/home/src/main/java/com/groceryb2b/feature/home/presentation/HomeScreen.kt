@@ -116,7 +116,7 @@ fun HomeScreen(
                     },
                     onContactUsClick = {
                         scope.launch { drawerState.close() }
-                        Toast.makeText(context, "আমাদের সাথে যোগাযোগ করুন: +৮৮০১৭XXXXXXXX", Toast.LENGTH_LONG).show()
+                        onNavigateToContactUs()
                     },
                     onLogoutClick = {
                         scope.launch { drawerState.close() }
