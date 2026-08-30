@@ -13,10 +13,13 @@ import com.groceryb2b.feature.home.presentation.homeScreen
 
 
 @Composable
-fun AppNavHost() {
+fun AppNavHost(isLoggedIn: Boolean) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = AuthRoutes.GRAPH) {
+    NavHost(
+        navController = navController,
+        startDestination = if (isLoggedIn) HomeRoutes.HOME else AuthRoutes.GRAPH
+    ) {
         authGraph(
             navController = navController,
             onAuthenticatedNewShop = {
