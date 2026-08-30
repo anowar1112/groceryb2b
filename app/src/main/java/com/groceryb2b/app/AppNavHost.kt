@@ -40,6 +40,10 @@ fun AppNavHost() {
             }
         )
 
-        homeScreen(navController)
+        homeScreen(navController) {
+            navController.navigate(AuthRoutes.GRAPH) {
+                popUpTo(HomeRoutes.HOME) { inclusive = true }
+            }
+        }
     }
 }

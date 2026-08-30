@@ -9,16 +9,33 @@ object HomeRoutes {
     const val CHECKOUT = "checkout"
     const val PROFILE = "profile"
     const val EDIT_PROFILE = "edit_profile"
+    const val ORDER_HISTORY = "order_history"
+    const val CONTACT_US = "contact_us"
     const val ORDER_DETAILS = "order_details/{orderId}"
     
     fun orderDetails(orderId: Long) = "order_details/$orderId"
 }
 
-fun NavGraphBuilder.homeScreen(navController: NavController) { 
+fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Unit) { 
     composable(HomeRoutes.HOME) { 
         HomeScreen(
             onNavigateToCheckout = { navController.navigate(HomeRoutes.CHECKOUT) },
-            onNavigateToProfile = { navController.navigate(HomeRoutes.PROFILE) }
+            onNavigateToProfile = { navController.navigate(HomeRoutes.PROFILE) },
+            onNavigateToOrderHistory = { navController.navigate(HomeRoutes.ORDER_HISTORY) },
+            onNavigateToEditProfile = { navController.navigate(HomeRoutes.EDIT_PROFILE) },
+            onNavigateToContactUs = { navController.navigate(HomeRoutes.CONTACT_US) },
+            onLogout = onLogout
+        )
+    }
+    composable(HomeRoutes.CONTACT_US) {
+        ContactUsScreen(onNavigateBack = { navController.popBackStack() })
+    }
+    composable(HomeRoutes.ORDER_HISTORY) {
+        OrderHistoryScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onOrderClick = { orderId ->
+                navController.navigate(HomeRoutes.orderDetails(orderId))
+            }
         )
     }
     composable(HomeRoutes.CHECKOUT) {
