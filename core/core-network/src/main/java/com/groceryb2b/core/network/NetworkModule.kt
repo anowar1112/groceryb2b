@@ -29,6 +29,11 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun providePermissionManager(sessionManager: SessionManager): PermissionManager =
+        DefaultPermissionManager(sessionManager)
+
+    @Provides
+    @Singleton
     fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             // NOTE: set to NONE in release builds via build-type config.

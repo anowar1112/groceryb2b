@@ -2,6 +2,7 @@ package com.groceryb2b.feature.auth.data
 
 import com.groceryb2b.core.common.Result
 import com.groceryb2b.core.database.shop.ShopDao
+import com.groceryb2b.core.network.PermissionAction
 import com.groceryb2b.core.network.SessionManager
 import com.groceryb2b.feature.auth.domain.AuthRepository
 import com.groceryb2b.feature.auth.domain.OtpVerifyResult
@@ -28,6 +29,9 @@ class LocalAuthRepository @Inject constructor(
         sessionManager.shopId = shop?.id?.toString()
         sessionManager.mobileNumber = mobileNumber
         sessionManager.isAdmin = mobileNumber in adminNumbers
+        if (sessionManager.isAdmin) {
+            sessionManager.setUserPermissions(mobileNumber, PermissionAction.values().toSet())
+        }
         return Result.Success(
             OtpVerifyResult(
                 accessToken = sessionManager.accessToken.orEmpty(),

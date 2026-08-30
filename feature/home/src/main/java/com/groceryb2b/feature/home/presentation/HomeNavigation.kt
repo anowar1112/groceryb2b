@@ -12,9 +12,13 @@ object HomeRoutes {
     const val ORDER_HISTORY = "order_history"
     const val CONTACT_US = "contact_us"
     const val ADMIN_DASHBOARD = "admin_dashboard"
+    const val ADMIN_PERMISSION = "admin_permission"
+    const val ADMIN_PRODUCT_FORM = "admin_product_form/{productId}"
+    const val ADMIN_PRODUCT_LIST = "admin_product_list"
     const val ORDER_DETAILS = "order_details/{orderId}"
     
     fun orderDetails(orderId: Long) = "order_details/$orderId"
+    fun adminProductForm(productId: Long = 0L) = if (productId > 0L) "admin_product_form/$productId" else "admin_product_form/0"
 }
 
 fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Unit) { 
@@ -29,7 +33,32 @@ fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Uni
         )
     }
     composable(HomeRoutes.ADMIN_DASHBOARD) {
-        AdminDashboardScreen(onNavigateBack = { navController.popBackStack() })
+        AdminDashboardScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToProductForm = { navController.navigate(HomeRoutes.ADMIN_PRODUCT_LIST) },
+            onNavigateToPermissionManagement = { navController.navigate(HomeRoutes.ADMIN_PERMISSION) }
+        )
+    }
+    composable(HomeRoutes.ADMIN_PERMISSION) {
+        AdminPermissionScreen(
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(HomeRoutes.ADMIN_PRODUCT_LIST) {
+        AdminProductListScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onAddProduct = { navController.navigate(HomeRoutes.adminProductForm()) },
+            onEditProduct = { productId ->
+                navController.navigate(HomeRoutes.adminProductForm(productId))
+            }
+        )
+    }
+    composable(HomeRoutes.ADMIN_PRODUCT_FORM) { backStackEntry ->
+        val productId = backStackEntry.arguments?.getString("productId")?.toLongOrNull()
+        AdminProductFormScreen(
+            productId = productId,
+            onNavigateBack = { navController.popBackStack() }
+        )
     }
     composable(HomeRoutes.CONTACT_US) {
         ContactUsScreen(onNavigateBack = { navController.popBackStack() })

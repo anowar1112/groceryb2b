@@ -1,6 +1,7 @@
 package com.groceryb2b.feature.auth.data
 
 import com.groceryb2b.core.common.Result
+import com.groceryb2b.core.network.PermissionAction
 import com.groceryb2b.core.network.SessionManager
 import com.groceryb2b.feature.auth.domain.AuthRepository
 import com.groceryb2b.feature.auth.domain.OtpVerifyResult
@@ -27,8 +28,11 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.mobileNumber = mobileNumber
             
             // Define admin numbers here
-            val adminNumbers = listOf("01557775958", "01700000000") 
+            val adminNumbers = listOf("01557775958", "01700000000")
             sessionManager.isAdmin = mobileNumber in adminNumbers
+            if (sessionManager.isAdmin) {
+                sessionManager.setUserPermissions(mobileNumber, PermissionAction.values().toSet())
+            }
 
             OtpVerifyResult(
                 accessToken = response.accessToken,
