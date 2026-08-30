@@ -22,10 +22,12 @@ class LocalAuthRepository @Inject constructor(
             return Result.Error("লোকাল মোডে confirmation code $LOCAL_CONFIRMATION_CODE ব্যবহার করুন")
         }
         val shop = shopDao.findByMobileNumber(mobileNumber)
+        val adminNumbers = listOf("01557775958", "01700000000")
         sessionManager.accessToken = "local-session-$mobileNumber"
         sessionManager.refreshToken = null
         sessionManager.shopId = shop?.id?.toString()
         sessionManager.mobileNumber = mobileNumber
+        sessionManager.isAdmin = mobileNumber in adminNumbers
         return Result.Success(
             OtpVerifyResult(
                 accessToken = sessionManager.accessToken.orEmpty(),

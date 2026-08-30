@@ -26,7 +26,8 @@ data class HomeUiState(
     val categories: List<CategoryEntity> = emptyList(),
     val products: List<ProductEntity> = emptyList(),
     val quantities: Map<Long, Int> = emptyMap(),
-    val shop: ShopEntity? = null
+    val shop: ShopEntity? = null,
+    val isAdmin: Boolean = false
 )
 
 @HiltViewModel
@@ -65,7 +66,8 @@ class HomeViewModel @Inject constructor(
                                 product.brand.lowercase().contains(normalized))
             },
             quantities = qty,
-            shop = shopInfo
+            shop = shopInfo,
+            isAdmin = sessionManager.isAdmin
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 

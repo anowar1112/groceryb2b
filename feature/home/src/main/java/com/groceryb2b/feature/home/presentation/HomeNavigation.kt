@@ -11,6 +11,7 @@ object HomeRoutes {
     const val EDIT_PROFILE = "edit_profile"
     const val ORDER_HISTORY = "order_history"
     const val CONTACT_US = "contact_us"
+    const val ADMIN_DASHBOARD = "admin_dashboard"
     const val ORDER_DETAILS = "order_details/{orderId}"
     
     fun orderDetails(orderId: Long) = "order_details/$orderId"
@@ -23,8 +24,12 @@ fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Uni
             onNavigateToOrderHistory = { navController.navigate(HomeRoutes.ORDER_HISTORY) },
             onNavigateToEditProfile = { navController.navigate(HomeRoutes.EDIT_PROFILE) },
             onNavigateToContactUs = { navController.navigate(HomeRoutes.CONTACT_US) },
+            onNavigateToAdminDashboard = { navController.navigate(HomeRoutes.ADMIN_DASHBOARD) },
             onLogout = onLogout
         )
+    }
+    composable(HomeRoutes.ADMIN_DASHBOARD) {
+        AdminDashboardScreen(onNavigateBack = { navController.popBackStack() })
     }
     composable(HomeRoutes.CONTACT_US) {
         ContactUsScreen(onNavigateBack = { navController.popBackStack() })

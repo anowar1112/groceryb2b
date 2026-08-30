@@ -25,6 +25,11 @@ class AuthRepositoryImpl @Inject constructor(
             sessionManager.refreshToken = response.refreshToken
             sessionManager.shopId = response.shopId
             sessionManager.mobileNumber = mobileNumber
+            
+            // Define admin numbers here
+            val adminNumbers = listOf("01557775958", "01700000000") 
+            sessionManager.isAdmin = mobileNumber in adminNumbers
+
             OtpVerifyResult(
                 accessToken = response.accessToken,
                 refreshToken = response.refreshToken,

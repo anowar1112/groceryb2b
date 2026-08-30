@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AdminPanelSettings
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.History
@@ -85,6 +86,7 @@ fun HomeScreen(
     onNavigateToOrderHistory: () -> Unit = {},
     onNavigateToEditProfile: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
+    onNavigateToAdminDashboard: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -101,6 +103,7 @@ fun HomeScreen(
             ) {
                 NavDrawerContent(
                     shop = state.shop,
+                    isAdmin = state.isAdmin,
                     onEditProfileClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToEditProfile()
@@ -112,6 +115,10 @@ fun HomeScreen(
                     onContactUsClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToContactUs()
+                    },
+                    onAdminDashboardClick = {
+                        scope.launch { drawerState.close() }
+                        onNavigateToAdminDashboard()
                     },
                     onLogoutClick = {
                         scope.launch { drawerState.close() }
@@ -289,9 +296,11 @@ fun CheckoutBottomBar(
 @Composable
 fun NavDrawerContent(
     shop: ShopEntity?,
+    isAdmin: Boolean = false,
     onEditProfileClick: () -> Unit,
     onOrderHistoryClick: () -> Unit,
     onContactUsClick: () -> Unit,
+    onAdminDashboardClick: () -> Unit = {},
     onLogoutClick: () -> Unit
 ) {
     Column(
@@ -360,6 +369,13 @@ fun NavDrawerContent(
             label = "আমাদের সাথে যোগাযোগ",
             onClick = onContactUsClick
         )
+        if (isAdmin) {
+            DrawerMenuItem(
+                icon = Icons.Default.AdminPanelSettings,
+                label = "অ্যাডমিন প্যানেল",
+                onClick = onAdminDashboardClick
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 

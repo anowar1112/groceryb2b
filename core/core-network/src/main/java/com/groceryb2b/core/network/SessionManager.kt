@@ -35,6 +35,10 @@ class SessionManager @Inject constructor(
         get() = prefs.getString(KEY_MOBILE_NUMBER, null)
         set(value) = prefs.edit { putString(KEY_MOBILE_NUMBER, value) }
 
+    var isAdmin: Boolean
+        get() = prefs.getBoolean(KEY_IS_ADMIN, false)
+        set(value) = prefs.edit { putBoolean(KEY_IS_ADMIN, value) }
+
     val isLoggedIn: Boolean
         get() = !accessToken.isNullOrBlank()
 
@@ -45,5 +49,6 @@ class SessionManager @Inject constructor(
         const val KEY_REFRESH_TOKEN = "refresh_token"
         const val KEY_SHOP_ID = "shop_id"
         const val KEY_MOBILE_NUMBER = "mobile_number"
+        const val KEY_IS_ADMIN = "is_admin"
     }
 }
