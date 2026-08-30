@@ -28,10 +28,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
@@ -387,7 +387,7 @@ fun NavDrawerContent(
             onClick = onLogoutClick,
             icon = { 
                 Icon(
-                    Icons.Default.ExitToApp, 
+                    Icons.AutoMirrored.Filled.ExitToApp, 
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.error
                 ) 
