@@ -20,7 +20,6 @@ fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Uni
     composable(HomeRoutes.HOME) { 
         HomeScreen(
             onNavigateToCheckout = { navController.navigate(HomeRoutes.CHECKOUT) },
-            onNavigateToProfile = { navController.navigate(HomeRoutes.PROFILE) },
             onNavigateToOrderHistory = { navController.navigate(HomeRoutes.ORDER_HISTORY) },
             onNavigateToEditProfile = { navController.navigate(HomeRoutes.EDIT_PROFILE) },
             onNavigateToContactUs = { navController.navigate(HomeRoutes.CONTACT_US) },

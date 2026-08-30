@@ -82,7 +82,6 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
     onNavigateToCheckout: () -> Unit = {},
-    onNavigateToProfile: () -> Unit = {},
     onNavigateToOrderHistory: () -> Unit = {},
     onNavigateToEditProfile: () -> Unit = {},
     onNavigateToContactUs: () -> Unit = {},
@@ -102,10 +101,6 @@ fun HomeScreen(
             ) {
                 NavDrawerContent(
                     shop = state.shop,
-                    onHeaderClick = {
-                        scope.launch { drawerState.close() }
-                        onNavigateToProfile()
-                    },
                     onEditProfileClick = {
                         scope.launch { drawerState.close() }
                         onNavigateToEditProfile()
@@ -294,7 +289,6 @@ fun CheckoutBottomBar(
 @Composable
 fun NavDrawerContent(
     shop: ShopEntity?,
-    onHeaderClick: () -> Unit,
     onEditProfileClick: () -> Unit,
     onOrderHistoryClick: () -> Unit,
     onContactUsClick: () -> Unit,
@@ -310,7 +304,6 @@ fun NavDrawerContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
-                .clickable { onHeaderClick() }
                 .padding(24.dp)
         ) {
             Column {
