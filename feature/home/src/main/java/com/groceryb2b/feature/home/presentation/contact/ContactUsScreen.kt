@@ -1,4 +1,4 @@
-package com.groceryb2b.feature.home.presentation
+package com.groceryb2b.feature.home.presentation.contact
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

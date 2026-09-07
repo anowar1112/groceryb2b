@@ -1,6 +1,5 @@
-package com.groceryb2b.feature.home.presentation
+package com.groceryb2b.feature.home.presentation.order
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,22 +31,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.groceryb2b.core.database.order.OrderEntity
-import com.groceryb2b.core.database.shop.ShopEntity
+import com.groceryb2b.feature.home.presentation.profile.ProfileUiState
+import com.groceryb2b.feature.home.presentation.profile.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(
+fun OrderHistoryScreen(
     viewModel: ProfileViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit = {},
-    onOrderClick: (Long) -> Unit = {},
-    onEditClick: () -> Unit = {}
+    onOrderClick: (Long) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("প্রোফাইল") },
+                title = { Text("অর্ডার ইতিহাস") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -69,24 +68,20 @@ fun ProfileScreen(
             
             is ProfileUiState.Success -> {
                 val success = uiState as ProfileUiState.Success
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        ShopProfileCard(success.shop, onEditClick)
+                if (success.orders.isEmpty()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("কোনো অর্ডার পাওয়া যায়নি", style = MaterialTheme.typography.bodyLarge)
                     }
-                    
-                    item {
-                        Text("অর্ডার ইতিহাস", style = MaterialTheme.typography.headlineSmall)
-                    }
-                    
-                    if (success.orders.isEmpty()) {
-                        item {
-                            Text("কোনো অর্ডার পাওয়া যায়নি", style = MaterialTheme.typography.bodyMedium)
-                        }
-                    } else {
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         items(success.orders, key = { it.id }) { order ->
                             OrderHistoryCard(order, onOrderClick)
                         }
@@ -111,62 +106,23 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ShopProfileCard(shop: ShopEntity, onEditClick: () -> Unit = {}) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable { onEditClick() }
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("দোকানের তথ্য", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                Text("✎ সম্পাদনা", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
-            }
-            Spacer(Modifier.height(12.dp))
-            
-            InfoRow("দোকানের নাম:", shop.shopName)
-            InfoRow("মালিকের নাম:", shop.ownerName)
-            InfoRow("মোবাইল:", shop.mobileNumber)
-            InfoRow("ঠিকানা:", shop.address)
-            InfoRow("ডেলিভারি লোকেশন:", shop.deliveryLocation)
-            shop.landmark?.takeIf { it.isNotBlank() }?.let { landmark ->
-                InfoRow("ল্যান্ডমার্ক:", landmark)
-            }
-        }
-    }
-}
-
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
-        Text(value, style = MaterialTheme.typography.labelMedium)
-    }
-}
-
-@Composable
 private fun OrderHistoryCard(order: OrderEntity, onOrderClick: (Long) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         onClick = { onOrderClick(order.id) }
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text("অর্ডার #${order.id}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.height(4.dp))
-                Text("মূল্য: ৳${order.totalPrice}", style = MaterialTheme.typography.bodyMedium)
-                Text("স্ট্যাটাস: ${getStatusBn(order.status)}", style = MaterialTheme.typography.labelMedium)
+                Text("মোট মূল্য: ৳${order.totalPrice}", style = MaterialTheme.typography.bodyMedium)
+                Text("অবস্থা: ${getStatusBn(order.status)}", style = MaterialTheme.typography.labelMedium)
             }
-            Text("→", style = MaterialTheme.typography.headlineSmall)
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null, modifier = Modifier.padding(start = 8.dp)) // Rotating this in real UI usually
         }
     }
 }

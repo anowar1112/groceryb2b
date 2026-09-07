@@ -1,4 +1,4 @@
-package com.groceryb2b.feature.home.presentation
+package com.groceryb2b.feature.home.presentation.admin.products
 
 import androidx.lifecycle.ViewModel
 import com.groceryb2b.core.database.catalog.ProductDao

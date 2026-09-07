@@ -1,4 +1,4 @@
-package com.groceryb2b.feature.home.presentation
+package com.groceryb2b.feature.home.presentation.checkout
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

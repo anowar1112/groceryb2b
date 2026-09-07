@@ -1,4 +1,4 @@
-package com.groceryb2b.feature.home.presentation
+package com.groceryb2b.feature.home.presentation.admin.permissions
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically

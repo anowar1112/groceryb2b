@@ -1,4 +1,4 @@
-package com.groceryb2b.feature.home.presentation
+package com.groceryb2b.feature.home.presentation.checkout
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

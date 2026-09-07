@@ -3,6 +3,18 @@ package com.groceryb2b.feature.home.presentation
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.groceryb2b.feature.home.presentation.admin.dashboard.AdminDashboardScreen
+import com.groceryb2b.feature.home.presentation.admin.orders.AdminOrderManagementScreen
+import com.groceryb2b.feature.home.presentation.admin.permissions.AdminPermissionScreen
+import com.groceryb2b.feature.home.presentation.admin.products.AdminProductFormScreen
+import com.groceryb2b.feature.home.presentation.admin.products.AdminProductListScreen
+import com.groceryb2b.feature.home.presentation.catalog.HomeScreen
+import com.groceryb2b.feature.home.presentation.checkout.CheckoutScreen
+import com.groceryb2b.feature.home.presentation.contact.ContactUsScreen
+import com.groceryb2b.feature.home.presentation.order.OrderDetailsScreen
+import com.groceryb2b.feature.home.presentation.order.OrderHistoryScreen
+import com.groceryb2b.feature.home.presentation.profile.EditProfileScreen
+import com.groceryb2b.feature.home.presentation.profile.ProfileScreen
 
 object HomeRoutes { 
     const val HOME = "home"
@@ -23,7 +35,7 @@ object HomeRoutes {
 }
 
 fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Unit) { 
-    composable(HomeRoutes.HOME) { 
+    composable(HomeRoutes.HOME) {
         HomeScreen(
             onNavigateToCheckout = { navController.navigate(HomeRoutes.CHECKOUT) },
             onNavigateToOrderHistory = { navController.navigate(HomeRoutes.ORDER_HISTORY) },
