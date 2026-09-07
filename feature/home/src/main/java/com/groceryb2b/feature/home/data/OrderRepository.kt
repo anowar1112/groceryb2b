@@ -3,6 +3,7 @@ package com.groceryb2b.feature.home.data
 import com.groceryb2b.core.database.order.OrderDao
 import com.groceryb2b.core.database.order.OrderEntity
 import com.groceryb2b.core.database.order.OrderItemEntity
+import com.groceryb2b.core.database.order.OrderWithShop
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
@@ -20,6 +21,14 @@ class OrderRepository @Inject constructor(
 ) {
     fun observeOrdersByShop(shopId: String): Flow<List<OrderEntity>> {
         return orderDao.observeOrdersByShop(shopId)
+    }
+
+    fun observeAllOrders(): Flow<List<OrderEntity>> {
+        return orderDao.observeAll()
+    }
+
+    fun observeAllOrdersWithShop(): Flow<List<OrderWithShop>> {
+        return orderDao.observeAllWithShop()
     }
 
     suspend fun createOrder(shopId: String, cartItems: List<CartItem>): Long {

@@ -1,12 +1,17 @@
 package com.groceryb2b.feature.home.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.groceryb2b.core.network.PermissionAction
 import com.groceryb2b.core.network.PermissionManager
 import com.groceryb2b.core.network.SessionManager
+import com.groceryb2b.feature.home.data.CatalogRepository
+import com.groceryb2b.feature.home.data.OrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 data class AdminDashboardUiState(
@@ -14,34 +19,36 @@ data class AdminDashboardUiState(
     val canAccessAdminPanel: Boolean = false,
     val canCreateProduct: Boolean = false,
     val canUpdateProduct: Boolean = false,
-    val canDeleteProduct: Boolean = false
+    val canDeleteProduct: Boolean = false,
+    val totalProducts: Int = 0,
+    val totalOrders: Int = 0,
+    val pendingOrders: Int = 0,
+    val lowStockCount: Int = 0
 )
 
 @HiltViewModel
 class AdminDashboardViewModel @Inject constructor(
     private val sessionManager: SessionManager,
-    private val permissionManager: PermissionManager
+    private val permissionManager: PermissionManager,
+    private val catalogRepository: CatalogRepository,
+    private val orderRepository: OrderRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
+    // Using immediate started strategy to ensure data is fresh when navigating back
+    val uiState: StateFlow<AdminDashboardUiState> = combine(
+        catalogRepository.products(),
+        orderRepository.observeAllOrders()
+    ) { products, orders ->
         AdminDashboardUiState(
             isAdmin = sessionManager.isAdmin,
             canAccessAdminPanel = permissionManager.hasPermission(PermissionAction.ADMIN_PANEL),
             canCreateProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_CREATE),
             canUpdateProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_UPDATE),
-            canDeleteProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_DELETE)
+            canDeleteProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_DELETE),
+            totalProducts = products.size,
+            totalOrders = orders.size,
+            pendingOrders = orders.count { it.status == "PENDING" },
+            lowStockCount = products.count { it.stock < 10 }
         )
-    )
-
-    val uiState: StateFlow<AdminDashboardUiState> = _uiState
-
-    fun refreshPermissions() {
-        _uiState.value = AdminDashboardUiState(
-            isAdmin = sessionManager.isAdmin,
-            canAccessAdminPanel = permissionManager.hasPermission(PermissionAction.ADMIN_PANEL),
-            canCreateProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_CREATE),
-            canUpdateProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_UPDATE),
-            canDeleteProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_DELETE)
-        )
-    }
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, AdminDashboardUiState())
 }

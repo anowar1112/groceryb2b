@@ -18,6 +18,13 @@ interface OrderDao {
     @Query("SELECT * FROM orders WHERE shopId = :shopId ORDER BY createdAtEpochMillis DESC")
     fun observeOrdersByShop(shopId: String): Flow<List<OrderEntity>>
 
+    @Query("SELECT * FROM orders ORDER BY createdAtEpochMillis DESC")
+    fun observeAll(): Flow<List<OrderEntity>>
+
+    @Transaction
+    @Query("SELECT * FROM orders ORDER BY createdAtEpochMillis DESC")
+    fun observeAllWithShop(): Flow<List<OrderWithShop>>
+
     @Query("SELECT * FROM orders WHERE id = :orderId")
     suspend fun getOrderById(orderId: Long): OrderEntity?
 

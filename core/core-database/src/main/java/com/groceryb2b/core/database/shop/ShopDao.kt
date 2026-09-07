@@ -16,6 +16,9 @@ interface ShopDao {
     @Query("SELECT * FROM shops WHERE mobileNumber = :mobileNumber LIMIT 1")
     fun observeByMobileNumber(mobileNumber: String): Flow<ShopEntity?>
 
+    @Query("SELECT * FROM shops ORDER BY shopName ASC")
+    fun observeAll(): Flow<List<ShopEntity>>
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(shop: ShopEntity): Long
 

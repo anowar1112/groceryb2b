@@ -12,6 +12,7 @@ object HomeRoutes {
     const val ORDER_HISTORY = "order_history"
     const val CONTACT_US = "contact_us"
     const val ADMIN_DASHBOARD = "admin_dashboard"
+    const val ADMIN_ORDER_MANAGEMENT = "admin_order_management"
     const val ADMIN_PERMISSION = "admin_permission"
     const val ADMIN_PRODUCT_FORM = "admin_product_form/{productId}"
     const val ADMIN_PRODUCT_LIST = "admin_product_list"
@@ -36,7 +37,16 @@ fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Uni
         AdminDashboardScreen(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToProductForm = { navController.navigate(HomeRoutes.ADMIN_PRODUCT_LIST) },
-            onNavigateToPermissionManagement = { navController.navigate(HomeRoutes.ADMIN_PERMISSION) }
+            onNavigateToOrderManagement = { navController.navigate(HomeRoutes.ADMIN_ORDER_MANAGEMENT) },
+            onNavigateToUserManagement = { navController.navigate(HomeRoutes.ADMIN_PERMISSION) }
+        )
+    }
+    composable(HomeRoutes.ADMIN_ORDER_MANAGEMENT) {
+        AdminOrderManagementScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onOrderClick = { orderId: Long ->
+                navController.navigate(HomeRoutes.orderDetails(orderId))
+            }
         )
     }
     composable(HomeRoutes.ADMIN_PERMISSION) {
@@ -54,9 +64,10 @@ fun NavGraphBuilder.homeScreen(navController: NavController, onLogout: () -> Uni
         )
     }
     composable(HomeRoutes.ADMIN_PRODUCT_FORM) { backStackEntry ->
-        val productId = backStackEntry.arguments?.getString("productId")?.toLongOrNull()
+        val productIdString = backStackEntry.arguments?.getString("productId")
+        val productId = productIdString?.toLongOrNull()
         AdminProductFormScreen(
-            productId = productId,
+            productId = if (productId == 0L) null else productId,
             onNavigateBack = { navController.popBackStack() }
         )
     }
