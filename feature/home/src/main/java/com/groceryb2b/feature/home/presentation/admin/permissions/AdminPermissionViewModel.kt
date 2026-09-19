@@ -19,7 +19,9 @@ import javax.inject.Inject
 data class AdminPermissionUiState(
     val searchQuery: String = "",
     val shops: List<ShopWithPermissions> = emptyList(),
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val currentUserMobile: String = "",
+    val canEditOthers: Boolean = false
 )
 
 data class ShopWithPermissions(
@@ -43,7 +45,19 @@ class AdminPermissionViewModel @Inject constructor(
         _refreshTrigger
     ) { allShops, query, _ ->
         val queryTrimmed = query.trim()
+        val currentUserMobile = sessionManager.mobileNumber.orEmpty()
         
+        // Check if current user has ALL permissions
+        val allAvailablePermissions = PermissionAction.entries.toSet()
+        val currentUserPermissions = mutableSetOf<PermissionAction>()
+        PermissionAction.entries.forEach { action ->
+            if (permissionManager.hasPermissionForUser(currentUserMobile, action)) {
+                currentUserPermissions += action
+            }
+        }
+        val isSuperAdmin = currentUserMobile == "01557775958"
+        val hasFullControl = isSuperAdmin || currentUserPermissions.containsAll(allAvailablePermissions)
+
         val shopsWithPermissions = allShops.map { shop ->
             val permissions = mutableSetOf<PermissionAction>()
             PermissionAction.entries.forEach { action ->
@@ -56,10 +70,8 @@ class AdminPermissionViewModel @Inject constructor(
             val hasAnyPermission = item.permissions.isNotEmpty() || item.shop.mobileNumber == "01557775958"
             
             if (queryTrimmed.isBlank()) {
-                // Default: Only show those with permissions
                 hasAnyPermission
             } else {
-                // Search: Show matching name or mobile
                 item.shop.shopName.contains(queryTrimmed, ignoreCase = true) || 
                 item.shop.mobileNumber.contains(queryTrimmed)
             }
@@ -68,7 +80,9 @@ class AdminPermissionViewModel @Inject constructor(
         AdminPermissionUiState(
             searchQuery = query,
             shops = shopsWithPermissions,
-            isLoading = false
+            isLoading = false,
+            currentUserMobile = currentUserMobile,
+            canEditOthers = hasFullControl
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdminPermissionUiState())
 
@@ -77,8 +91,10 @@ class AdminPermissionViewModel @Inject constructor(
     }
 
     fun togglePermission(mobileNumber: String, action: PermissionAction, shouldBeEnabled: Boolean) {
-        if (!sessionManager.isAdmin) return
+        val state = uiState.value
+        if (!state.canEditOthers) return // Only those with full permissions can edit
         if (mobileNumber == "01557775958") return // Cannot toggle super admin
+        if (mobileNumber == state.currentUserMobile) return // Cannot toggle own permissions
         
         viewModelScope.launch {
             if (shouldBeEnabled) {
@@ -86,7 +102,6 @@ class AdminPermissionViewModel @Inject constructor(
             } else {
                 permissionManager.revokePermission(mobileNumber, action)
             }
-            // Trigger refresh to update UI immediately
             _refreshTrigger.value += 1
         }
     }

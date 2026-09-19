@@ -67,7 +67,7 @@ class HomeViewModel @Inject constructor(
             },
             quantities = qty,
             shop = shopInfo,
-            isAdmin = sessionManager.isAdmin
+            isAdmin = sessionManager.isAdmin || sessionManager.userPermissions.isNotEmpty()
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 

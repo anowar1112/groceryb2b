@@ -4,10 +4,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class PermissionAction {
-    ADMIN_PANEL,
     PRODUCT_CREATE,
     PRODUCT_UPDATE,
-    PRODUCT_DELETE
+    PRODUCT_DELETE,
+    ORDER_MANAGE
 }
 
 interface PermissionManager {
@@ -33,6 +33,7 @@ class DefaultPermissionManager @Inject constructor(
         mobileNumber: String,
         action: PermissionAction
     ): Boolean {
+        if (mobileNumber == "01557775958") return true // Super Admin always has all
         if (mobileNumber == sessionManager.mobileNumber && sessionManager.isAdmin) {
             return true
         }

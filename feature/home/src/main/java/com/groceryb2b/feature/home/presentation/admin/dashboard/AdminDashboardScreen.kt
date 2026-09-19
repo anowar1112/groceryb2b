@@ -188,7 +188,7 @@ fun AdminDashboardScreen(
                             )
                         }
                         
-                        if (state.canAccessAdminPanel) {
+                        if (state.canManageOrders) {
                             AdminActionItem(
                                 title = "অর্ডার ম্যানেজ করুন",
                                 subtitle = "সব অর্ডারের অবস্থা এবং ট্র্যাকিং",

@@ -16,10 +16,10 @@ import javax.inject.Inject
 
 data class AdminDashboardUiState(
     val isAdmin: Boolean = false,
-    val canAccessAdminPanel: Boolean = false,
     val canCreateProduct: Boolean = false,
     val canUpdateProduct: Boolean = false,
     val canDeleteProduct: Boolean = false,
+    val canManageOrders: Boolean = false,
     val totalProducts: Int = 0,
     val totalOrders: Int = 0,
     val pendingOrders: Int = 0,
@@ -34,17 +34,16 @@ class AdminDashboardViewModel @Inject constructor(
     private val orderRepository: OrderRepository
 ) : ViewModel() {
 
-    // Using immediate started strategy to ensure data is fresh when navigating back
     val uiState: StateFlow<AdminDashboardUiState> = combine(
         catalogRepository.products(),
         orderRepository.observeAllOrders()
     ) { products, orders ->
         AdminDashboardUiState(
             isAdmin = sessionManager.isAdmin,
-            canAccessAdminPanel = permissionManager.hasPermission(PermissionAction.ADMIN_PANEL),
             canCreateProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_CREATE),
             canUpdateProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_UPDATE),
             canDeleteProduct = permissionManager.hasPermission(PermissionAction.PRODUCT_DELETE),
+            canManageOrders = permissionManager.hasPermission(PermissionAction.ORDER_MANAGE),
             totalProducts = products.size,
             totalOrders = orders.size,
             pendingOrders = orders.count { it.status == "PENDING" },

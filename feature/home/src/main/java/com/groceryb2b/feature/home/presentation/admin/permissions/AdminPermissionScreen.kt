@@ -28,6 +28,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Store
 import androidx.compose.material.icons.filled.VerifiedUser
@@ -85,6 +86,11 @@ fun AdminPermissionScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Permission Info Banner
+            if (!state.canEditOthers) {
+                SurfaceInfoBanner(message = "অন্যদের পারমিশন পরিবর্তন করতে আপনার নিজের সবগুলো পারমিশন থাকতে হবে।")
+            }
+
             // Search Section
             OutlinedTextField(
                 value = state.searchQuery,
@@ -93,7 +99,7 @@ fun AdminPermissionScreen(
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
             )
@@ -117,6 +123,8 @@ fun AdminPermissionScreen(
                     items(state.shops, key = { it.shop.id }) { shopWithPermissions ->
                         UserPermissionCard(
                             shopWithPermissions = shopWithPermissions,
+                            currentUserMobile = state.currentUserMobile,
+                            canCurrentAdminEdit = state.canEditOthers,
                             onTogglePermission = viewModel::togglePermission
                         )
                     }
@@ -128,17 +136,44 @@ fun AdminPermissionScreen(
 }
 
 @Composable
+private fun SurfaceInfoBanner(message: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f))
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    }
+}
+
+@Composable
 private fun UserPermissionCard(
     shopWithPermissions: ShopWithPermissions,
+    currentUserMobile: String,
+    canCurrentAdminEdit: Boolean,
     onTogglePermission: (String, PermissionAction, Boolean) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     val shop = shopWithPermissions.shop
     val permissions = shopWithPermissions.permissions
     val isSuperAdmin = shop.mobileNumber == "01557775958"
+    val isSelf = shop.mobileNumber == currentUserMobile
 
     val cardBackgroundColor = if (isSuperAdmin) {
-        // High premium look: subtle navy/darker surface with light primary accent
         MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     } else {
         MaterialTheme.colorScheme.surface
@@ -190,7 +225,7 @@ private fun UserPermissionCard(
                                 Box(
                                     modifier = Modifier
                                         .background(
-                                            color = Color(0xFFEF6C00), // AccentOrange touch
+                                            color = Color(0xFFEF6C00), 
                                             shape = RoundedCornerShape(4.dp)
                                         )
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -202,6 +237,14 @@ private fun UserPermissionCard(
                                         fontWeight = FontWeight.ExtraBold
                                     )
                                 }
+                            } else if (isSelf) {
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    text = "(আপনি)",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                         Text(
@@ -236,11 +279,14 @@ private fun UserPermissionCard(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
+                    // Logic: You can edit others only if you have full permissions, you are not editing yourself, and target is not super admin
+                    val canEditThisUser = canCurrentAdminEdit && !isSelf && !isSuperAdmin
+
                     PermissionToggleItem(
                         label = "পণ্য যোগ করুন",
                         description = "নতুন পণ্য ক্যাটালগে যুক্ত করার ক্ষমতা",
                         isGranted = permissions.contains(PermissionAction.PRODUCT_CREATE) || isSuperAdmin,
-                        enabled = !isSuperAdmin,
+                        enabled = canEditThisUser,
                         onToggle = { onTogglePermission(shop.mobileNumber, PermissionAction.PRODUCT_CREATE, it) }
                     )
 
@@ -248,7 +294,7 @@ private fun UserPermissionCard(
                         label = "পণ্য আপডেট",
                         description = "বিদ্যমান পণ্যের তথ্য বা দাম পরিবর্তন",
                         isGranted = permissions.contains(PermissionAction.PRODUCT_UPDATE) || isSuperAdmin,
-                        enabled = !isSuperAdmin,
+                        enabled = canEditThisUser,
                         onToggle = { onTogglePermission(shop.mobileNumber, PermissionAction.PRODUCT_UPDATE, it) }
                     )
 
@@ -256,17 +302,43 @@ private fun UserPermissionCard(
                         label = "পণ্য মুছে ফেলুন",
                         description = "ক্যাটালগ থেকে পণ্য স্থায়ীভাবে মুছে ফেলা",
                         isGranted = permissions.contains(PermissionAction.PRODUCT_DELETE) || isSuperAdmin,
-                        enabled = !isSuperAdmin,
+                        enabled = canEditThisUser,
                         onToggle = { onTogglePermission(shop.mobileNumber, PermissionAction.PRODUCT_DELETE, it) }
                     )
 
                     PermissionToggleItem(
-                        label = "অ্যাডমিন প্যানেল অ্যাক্সেস",
-                        description = "সম্পূর্ণ ড্যাশবোর্ড এবং পারমিশন কন্ট্রোল",
-                        isGranted = permissions.contains(PermissionAction.ADMIN_PANEL) || isSuperAdmin,
-                        enabled = !isSuperAdmin,
-                        onToggle = { onTogglePermission(shop.mobileNumber, PermissionAction.ADMIN_PANEL, it) }
+                        label = "অর্ডার ম্যানেজমেন্ট",
+                        description = "অর্ডার দেখা এবং স্ট্যাটাস পরিবর্তন করার ক্ষমতা",
+                        isGranted = permissions.contains(PermissionAction.ORDER_MANAGE) || isSuperAdmin,
+                        enabled = canEditThisUser,
+                        onToggle = { onTogglePermission(shop.mobileNumber, PermissionAction.ORDER_MANAGE, it) }
                     )
+                    
+                    if (isSuperAdmin) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "* সুপার এডমিনের পারমিশন পরিবর্তন করা সম্ভব নয়।",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else if (isSelf) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "* আপনি নিজের পারমিশন নিজে পরিবর্তন করতে পারবেন না।",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    } else if (!canCurrentAdminEdit) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            text = "* অন্যদের পারমিশন পরিবর্তন করার ক্ষমতা আপনার নেই।",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
                 }
             }
         }
