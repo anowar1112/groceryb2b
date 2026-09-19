@@ -15,6 +15,7 @@ data class CartItem(
     val unit: String,
     val quantity: Int,
     val pricePerUnit: Int,
+    val originalPricePerUnit: Int = 0,
     val totalPrice: Int
 )
 
@@ -32,6 +33,14 @@ class CartRepository @Inject constructor(
         return cartDao.observeByShop(shopId).map { cartItems ->
             val items = cartItems.mapNotNull { cartItem ->
                 val product = productDao.getById(cartItem.productId) ?: return@mapNotNull null
+                
+                // Calculate discounted price: price * (100 - discount) / 100
+                val discountedPrice = if (product.discountPercent > 0) {
+                    (product.price * (100 - product.discountPercent)) / 100
+                } else {
+                    product.price
+                }
+                
                 CartItem(
                     productId = cartItem.productId,
                     productNameBn = product.nameBn,
@@ -39,8 +48,9 @@ class CartRepository @Inject constructor(
                     brand = product.brand,
                     unit = product.unit,
                     quantity = cartItem.quantity,
-                    pricePerUnit = product.price,
-                    totalPrice = product.price * cartItem.quantity
+                    pricePerUnit = discountedPrice,
+                    originalPricePerUnit = product.price,
+                    totalPrice = discountedPrice * cartItem.quantity
                 )
             }
             CartSummary(

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Payments
+import androidx.compose.material.icons.filled.Percent
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -207,6 +208,18 @@ fun AdminProductFormScreen(
                     shape = MaterialTheme.shapes.medium
                 )
             }
+
+            // Discount
+            OutlinedTextField(
+                value = uiState.discountPercent,
+                onValueChange = { viewModel.updateField("discountPercent", it) },
+                label = { Text("ছাড় (%)") },
+                placeholder = { Text("যেমন: ৫ বা ১০") },
+                leadingIcon = { Icon(Icons.Default.Percent, contentDescription = null) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(0.5f),
+                shape = MaterialTheme.shapes.medium
+            )
 
             if (uiState.errorMessage != null) {
                 Text(

@@ -64,6 +64,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.groceryb2b.core.database.catalog.ProductEntity
@@ -475,12 +476,30 @@ private fun ProductCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(
-                        text = "৳${product.price}",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
+                    val discountedPrice = if (product.discountPercent > 0) {
+                        (product.price * (100 - product.discountPercent)) / 100
+                    } else {
+                        product.price
+                    }
+
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = "৳$discountedPrice",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        if (product.discountPercent > 0) {
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "৳${product.price}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                textDecoration = TextDecoration.LineThrough,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                    
                     Text(
                         text = if (product.stock > 0) "স্টক: ${product.stock}, ${product.unit}" else "স্টক নেই",
                         style = MaterialTheme.typography.labelSmall,

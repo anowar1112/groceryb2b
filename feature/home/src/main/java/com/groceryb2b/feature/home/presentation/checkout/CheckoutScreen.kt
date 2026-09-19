@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.groceryb2b.core.ui.components.PrimaryButton
@@ -184,7 +186,27 @@ private fun CartItemCard(item: CartItem) {
                 Spacer(Modifier.height(4.dp))
                 Text(item.unit, style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(6.dp))
-                Text("৳${item.pricePerUnit} × ${item.quantity} = ৳${item.totalPrice}", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "৳${item.pricePerUnit}",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    if (item.originalPricePerUnit > item.pricePerUnit) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "৳${item.originalPricePerUnit}",
+                            style = MaterialTheme.typography.labelSmall,
+                            textDecoration = TextDecoration.LineThrough,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                    Text(
+                        text = " × ${item.quantity}",
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
             Column(horizontalAlignment = Alignment.End) {
                 Text("পরিমাণ: ${item.quantity}", style = MaterialTheme.typography.labelMedium)

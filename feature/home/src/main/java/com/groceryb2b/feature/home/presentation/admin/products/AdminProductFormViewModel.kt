@@ -18,6 +18,7 @@ data class AdminProductFormUiState(
     val brand: String = "",
     val unit: String = "",
     val price: String = "",
+    val discountPercent: String = "0",
     val stock: String = "",
     val existingId: Long? = null,
     val isSaving: Boolean = false,
@@ -42,6 +43,7 @@ class AdminProductFormViewModel @Inject constructor(
                 "brand" -> state.copy(brand = value)
                 "unit" -> state.copy(unit = value)
                 "price" -> state.copy(price = value)
+                "discountPercent" -> state.copy(discountPercent = value)
                 "stock" -> state.copy(stock = value)
                 else -> state
             }
@@ -62,6 +64,7 @@ class AdminProductFormViewModel @Inject constructor(
             brand = product.brand,
             unit = product.unit,
             price = product.price.toString(),
+            discountPercent = product.discountPercent.toString(),
             stock = product.stock.toString(),
             existingId = product.id
         )
@@ -76,6 +79,8 @@ class AdminProductFormViewModel @Inject constructor(
 
         val price = state.price.toIntOrNull()
         val stock = state.stock.toIntOrNull()
+        val discount = state.discountPercent.toIntOrNull() ?: 0
+        
         if (price == null || stock == null) {
             _uiState.update { it.copy(errorMessage = "Price এবং Stock অবশ্যই সংখ্যা হতে হবে") }
             return@launch
@@ -91,6 +96,7 @@ class AdminProductFormViewModel @Inject constructor(
             brand = state.brand,
             unit = state.unit,
             price = price,
+            discountPercent = discount,
             stock = stock,
             minimumOrderQuantity = 1
         )

@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.groceryb2b.core.database.catalog.ProductEntity
@@ -234,12 +235,27 @@ private fun AdminProductItem(
                 )
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    val discountedPrice = if (product.discountPercent > 0) {
+                        (product.price * (100 - product.discountPercent)) / 100
+                    } else {
+                        product.price
+                    }
+
                     Text(
-                        text = "৳${product.price}",
+                        text = "৳$discountedPrice",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.ExtraBold
                     )
+                    if (product.discountPercent > 0) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(
+                            text = "৳${product.price}",
+                            style = MaterialTheme.typography.bodySmall,
+                            textDecoration = TextDecoration.LineThrough,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
                     Spacer(Modifier.width(12.dp))
                     Text(
                         text = "স্টক: ${product.stock}",
