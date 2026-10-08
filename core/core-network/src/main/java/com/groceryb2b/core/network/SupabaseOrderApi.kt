@@ -1,7 +1,6 @@
 package com.groceryb2b.core.network
 
 import com.google.gson.annotations.SerializedName
-import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -22,7 +21,7 @@ interface SupabaseOrderApi {
     suspend fun upsertOrderItems(
         @Query("on_conflict") conflictColumn: String = "client_id",
         @Body items: List<CreateRemoteOrderItemDto>
-    ): ResponseBody
+    ): Unit
 
     @GET("orders")
     suspend fun ordersForShop(
@@ -36,7 +35,7 @@ interface SupabaseOrderApi {
     suspend fun updateOrderStatus(
         @Query("id") orderIdFilter: String,
         @Body status: UpdateRemoteOrderStatusDto
-    ): ResponseBody
+    ): Unit
 }
 
 data class CreateRemoteOrderDto(
