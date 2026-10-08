@@ -7,7 +7,7 @@ import com.groceryb2b.core.database.shop.ShopEntity
 data class OrderWithShop(
     @Embedded val order: OrderEntity,
     @Relation(
-        parentColumn = "shopId",
+        parentColumn = "shopMobileNumber",
         entityColumn = "mobileNumber"
     )
     val shop: ShopEntity?

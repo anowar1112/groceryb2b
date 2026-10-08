@@ -37,4 +37,10 @@ object DatabaseMigrations {
             database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_orders_clientSyncId` ON `orders` (`clientSyncId`)")
         }
     }
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE `orders` ADD COLUMN `shopMobileNumber` TEXT NOT NULL DEFAULT ''")
+            database.execSQL("UPDATE `orders` SET `shopMobileNumber` = (SELECT `mobileNumber` FROM `shops` WHERE CAST(`shops`.`id` AS TEXT) = `orders`.`shopId`) WHERE `shopMobileNumber` = ''")
+        }
+    }
 }

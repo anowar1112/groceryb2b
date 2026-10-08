@@ -4,6 +4,8 @@ import com.groceryb2b.core.database.order.OrderDao
 import com.groceryb2b.core.database.order.OrderEntity
 import com.groceryb2b.core.database.order.OrderItemEntity
 import com.groceryb2b.core.database.order.OrderWithShop
+import com.groceryb2b.core.database.shop.ShopEntity
+import com.groceryb2b.core.database.shop.ShopDao
 import com.groceryb2b.core.database.catalog.ProductDao
 import com.groceryb2b.core.network.SessionManager
 import com.groceryb2b.core.network.SupabaseOrderApi
@@ -13,6 +15,8 @@ import com.groceryb2b.core.network.CreateRemoteOrderItemDto
 import com.groceryb2b.core.network.UpdateRemoteOrderStatusDto
 import com.groceryb2b.core.network.SupabaseSessionRefresher
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import javax.inject.Inject
 
@@ -28,11 +32,14 @@ data class OrderSummary(
 class OrderRepository @Inject constructor(
     private val orderDao: OrderDao,
     private val productDao: ProductDao,
+    private val shopDao: ShopDao,
     private val sessionManager: SessionManager,
     private val sessionRefresher: SupabaseSessionRefresher,
     private val shopApi: SupabaseShopApi,
     private val remoteOrderApi: SupabaseOrderApi
 ) {
+    private val syncMutex = Mutex()
+
     fun observeOrdersByShop(shopId: String): Flow<List<OrderEntity>> {
         return orderDao.observeOrdersByShop(shopId)
     }
@@ -51,6 +58,7 @@ class OrderRepository @Inject constructor(
         val order = OrderEntity(
             clientSyncId = UUID.randomUUID().toString(),
             shopId = shopId,
+            shopMobileNumber = sessionManager.mobileNumber.orEmpty(),
             totalPrice = totalPrice,
             status = "PENDING"
         )
@@ -101,19 +109,43 @@ class OrderRepository @Inject constructor(
         orderDao.deleteOrderById(orderId)
     }
 
-    suspend fun syncRemoteOrders() {
+    suspend fun syncRemoteOrders() = syncMutex.withLock {
         sessionRefresher.ensureFreshSession()
-        val remoteShop = currentRemoteShop() ?: return
-        orderDao.getOrdersPendingUpload().forEach { localOrder ->
+        val localShopId = sessionManager.shopId
+        if (localShopId != null) orderDao.getOrdersPendingUpload(localShopId).forEach { localOrder ->
             uploadOrder(localOrder.id)
         }
-        remoteOrderApi.ordersForShop("eq.${remoteShop.id}").forEach { remoteOrder ->
+
+        val remoteShops = if (sessionManager.isAdmin) {
+            shopApi.allShops()
+        } else {
+            listOfNotNull(currentRemoteShop())
+        }
+        if (remoteShops.isEmpty()) return@withLock
+
+        val localShopsByRemoteId = remoteShops.associate { remoteShop ->
+            remoteShop.id to getOrCreateLocalShop(remoteShop)
+        }
+        val remoteOrders = if (sessionManager.isAdmin) {
+            remoteOrderApi.allOrders()
+        } else {
+            remoteOrderApi.ordersForShop("eq.${remoteShops.first().id}")
+        }
+
+        remoteOrders.forEach { remoteOrder ->
+            val localShop = localShopsByRemoteId[remoteOrder.shopId] ?: return@forEach
             val clientId = remoteOrder.clientId
             val existingOrder = orderDao.getOrderByRemoteId(remoteOrder.id)
                 ?: if (clientId == null) null else orderDao.getOrderByClientSyncId(clientId)
             if (existingOrder != null) {
                 if (existingOrder.remoteId == null) {
                     orderDao.updateRemoteId(existingOrder.id, remoteOrder.id)
+                }
+                if (existingOrder.shopId != localShop.id.toString()) {
+                    orderDao.updateShopId(existingOrder.id, localShop.id.toString())
+                }
+                if (existingOrder.shopMobileNumber != localShop.mobileNumber) {
+                    orderDao.updateShopMobileNumber(existingOrder.id, localShop.mobileNumber)
                 }
                 if (existingOrder.status != remoteOrder.status) {
                     orderDao.updateOrderStatus(existingOrder.id, remoteOrder.status)
@@ -124,7 +156,8 @@ class OrderRepository @Inject constructor(
                 OrderEntity(
                     remoteId = remoteOrder.id,
                     clientSyncId = remoteOrder.clientId,
-                    shopId = sessionManager.shopId ?: return@forEach,
+                    shopId = localShop.id.toString(),
+                    shopMobileNumber = localShop.mobileNumber,
                     totalPrice = remoteOrder.totalPrice,
                     status = remoteOrder.status
                 )
@@ -143,6 +176,26 @@ class OrderRepository @Inject constructor(
                 )
             })
         }
+    }
+
+    private suspend fun getOrCreateLocalShop(remoteShop: com.groceryb2b.core.network.RemoteShopDto): ShopEntity {
+        val existingShop = shopDao.findByMobileNumber(remoteShop.mobileNumber)
+        val syncedShop = ShopEntity(
+            id = existingShop?.id ?: 0,
+            shopName = remoteShop.shopName,
+            ownerName = remoteShop.ownerName,
+            mobileNumber = remoteShop.mobileNumber,
+            address = remoteShop.address,
+            deliveryLocation = remoteShop.deliveryLocation,
+            landmark = remoteShop.landmark,
+            createdAtEpochMillis = existingShop?.createdAtEpochMillis ?: System.currentTimeMillis(),
+            updatedAtEpochMillis = System.currentTimeMillis()
+        )
+        if (existingShop == null) {
+            return syncedShop.copy(id = shopDao.insert(syncedShop))
+        }
+        shopDao.update(syncedShop)
+        return syncedShop
     }
 
     private suspend fun uploadOrder(orderId: Long) {

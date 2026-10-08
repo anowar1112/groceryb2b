@@ -44,6 +44,18 @@ class AdminOrderManagementViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdminOrderUiState())
 
+    init {
+        viewModelScope.launch {
+            try {
+                orderRepository.syncRemoteOrders()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                errorMessage.value = error.message ?: "অর্ডার sync করা যায়নি"
+            }
+        }
+    }
+
     fun updateFilter(status: String?) {
         selectedStatus.value = status
     }

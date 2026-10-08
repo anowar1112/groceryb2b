@@ -30,6 +30,12 @@ interface SupabaseOrderApi {
         @Query("order") order: String = "created_at.desc"
     ): List<RemoteOrderDto>
 
+    @GET("orders")
+    suspend fun allOrders(
+        @Query("select") select: String = "*,order_items(*)",
+        @Query("order") order: String = "created_at.desc"
+    ): List<RemoteOrderDto>
+
     @PATCH("orders")
     @Headers("Prefer: return=minimal")
     suspend fun updateOrderStatus(

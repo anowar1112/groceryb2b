@@ -14,7 +14,7 @@ import com.groceryb2b.core.database.order.OrderDao
 import com.groceryb2b.core.database.order.OrderEntity
 import com.groceryb2b.core.database.order.OrderItemEntity
 
-@Database(entities = [ShopEntity::class, CategoryEntity::class, ProductEntity::class, CartItemEntity::class, OrderEntity::class, OrderItemEntity::class], version = 6, exportSchema = true)
+@Database(entities = [ShopEntity::class, CategoryEntity::class, ProductEntity::class, CartItemEntity::class, OrderEntity::class, OrderItemEntity::class], version = 7, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun shopDao(): ShopDao
     abstract fun categoryDao(): CategoryDao

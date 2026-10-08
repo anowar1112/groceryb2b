@@ -10,6 +10,11 @@ import retrofit2.http.Query
 
 interface SupabaseShopApi {
     @GET("shops")
+    suspend fun allShops(
+        @Query("select") select: String = "*"
+    ): List<RemoteShopDto>
+
+    @GET("shops")
     suspend fun findByMobileNumber(
         @Query("mobile_number") mobileNumberFilter: String,
         @Query("select") select: String = "*"

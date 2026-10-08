@@ -17,6 +17,7 @@ data class OrderEntity(
     val remoteId: String? = null,
     val clientSyncId: String? = null,
     val shopId: String,
+    val shopMobileNumber: String = "",
     val totalPrice: Int,
     val status: String, // PENDING, CONFIRMED, DELIVERED, CANCELLED
     val createdAtEpochMillis: Long = System.currentTimeMillis(),
