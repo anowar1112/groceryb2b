@@ -18,6 +18,9 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE id = :id")
     suspend fun getById(id: Long): ProductEntity?
 
+    @Query("SELECT * FROM products WHERE nameEn = :nameEn LIMIT 1")
+    suspend fun getByNameEn(nameEn: String): ProductEntity?
+
     @Insert
     suspend fun insert(product: ProductEntity): Long
 

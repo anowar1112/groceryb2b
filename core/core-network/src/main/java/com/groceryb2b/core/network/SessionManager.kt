@@ -27,6 +27,10 @@ class SessionManager @Inject constructor(
         get() = prefs.getString(KEY_REFRESH_TOKEN, null)
         set(value) = prefs.edit { putString(KEY_REFRESH_TOKEN, value) }
 
+    var accessTokenExpiresAtEpochMillis: Long
+        get() = prefs.getLong(KEY_ACCESS_TOKEN_EXPIRES_AT, 0L)
+        set(value) = prefs.edit { putLong(KEY_ACCESS_TOKEN_EXPIRES_AT, value) }
+
     var shopId: String?
         get() = prefs.getString(KEY_SHOP_ID, null)
         set(value) = prefs.edit { putString(KEY_SHOP_ID, value) }
@@ -49,6 +53,9 @@ class SessionManager @Inject constructor(
     val isLoggedIn: Boolean
         get() = !accessToken.isNullOrBlank()
 
+    val shouldRefreshAccessToken: Boolean
+        get() = accessTokenExpiresAtEpochMillis <= System.currentTimeMillis() + TOKEN_REFRESH_SKEW_MILLIS
+
     fun setUserPermissions(mobileNumber: String, permissions: Set<PermissionAction>) {
         val key = "user_permissions_$mobileNumber"
         prefs.edit { putStringSet(key, permissions.map { it.name }.toSet()) }
@@ -67,9 +74,11 @@ class SessionManager @Inject constructor(
     private companion object {
         const val KEY_ACCESS_TOKEN = "access_token"
         const val KEY_REFRESH_TOKEN = "refresh_token"
+        const val KEY_ACCESS_TOKEN_EXPIRES_AT = "access_token_expires_at"
         const val KEY_SHOP_ID = "shop_id"
         const val KEY_MOBILE_NUMBER = "mobile_number"
         const val KEY_IS_ADMIN = "is_admin"
         const val KEY_USER_PERMISSIONS = "user_permissions"
+        const val TOKEN_REFRESH_SKEW_MILLIS = 60_000L
     }
 }

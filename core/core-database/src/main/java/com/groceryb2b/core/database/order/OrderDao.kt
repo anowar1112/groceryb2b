@@ -28,6 +28,21 @@ interface OrderDao {
     @Query("SELECT * FROM orders WHERE id = :orderId")
     suspend fun getOrderById(orderId: Long): OrderEntity?
 
+    @Query("SELECT * FROM orders WHERE remoteId = :remoteId LIMIT 1")
+    suspend fun getOrderByRemoteId(remoteId: String): OrderEntity?
+
+    @Query("SELECT * FROM orders WHERE clientSyncId = :clientSyncId LIMIT 1")
+    suspend fun getOrderByClientSyncId(clientSyncId: String): OrderEntity?
+
+    @Query("SELECT * FROM orders WHERE remoteId IS NULL ORDER BY createdAtEpochMillis ASC")
+    suspend fun getOrdersPendingUpload(): List<OrderEntity>
+
+    @Query("UPDATE orders SET remoteId = :remoteId WHERE id = :orderId")
+    suspend fun updateRemoteId(orderId: Long, remoteId: String)
+
+    @Query("UPDATE orders SET clientSyncId = :clientSyncId WHERE id = :orderId")
+    suspend fun updateClientSyncId(orderId: Long, clientSyncId: String)
+
     @Query("SELECT * FROM order_items WHERE orderId = :orderId")
     suspend fun getOrderItems(orderId: Long): List<OrderItemEntity>
 

@@ -1,6 +1,6 @@
 package com.groceryb2b.feature.auth.di
 
-import com.groceryb2b.feature.auth.data.LocalAuthRepository
+import com.groceryb2b.feature.auth.data.AuthRepositoryImpl
 import com.groceryb2b.feature.auth.domain.AuthRepository
 import dagger.Binds
 import dagger.Module
@@ -13,5 +13,5 @@ import javax.inject.Singleton
 abstract class AuthRepositoryModule {
     @Binds
     @Singleton
-    abstract fun bindAuthRepository(impl: LocalAuthRepository): AuthRepository
+    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 }

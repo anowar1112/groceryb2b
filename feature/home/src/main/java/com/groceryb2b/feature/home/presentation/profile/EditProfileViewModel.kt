@@ -5,6 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.groceryb2b.core.database.shop.ShopDao
 import com.groceryb2b.core.database.shop.ShopEntity
 import com.groceryb2b.core.network.SessionManager
+import com.groceryb2b.core.network.SupabaseSessionRefresher
+import com.groceryb2b.core.network.SupabaseShopApi
+import com.groceryb2b.core.network.UpdateRemoteShopDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +25,9 @@ sealed class EditProfileUiState {
 @HiltViewModel
 class EditProfileViewModel @Inject constructor(
     private val shopDao: ShopDao,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val sessionRefresher: SupabaseSessionRefresher,
+    private val shopApi: SupabaseShopApi
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow<EditProfileUiState>(EditProfileUiState.Loading)
@@ -107,6 +112,21 @@ class EditProfileViewModel @Inject constructor(
                 updatedAtEpochMillis = System.currentTimeMillis()
             )
 
+            sessionRefresher.ensureFreshSession()
+            val mobileNumber = sessionManager.mobileNumber
+                ?: error("সেশনে মোবাইল নম্বর পাওয়া যায়নি")
+            val remoteShop = shopApi.findByMobileNumber("eq.$mobileNumber").firstOrNull()
+                ?: error("সার্ভারে দোকানের তথ্য পাওয়া যায়নি")
+            shopApi.update(
+                "eq.${remoteShop.id}",
+                UpdateRemoteShopDto(
+                    shopName = updatedShop.shopName,
+                    ownerName = updatedShop.ownerName,
+                    address = updatedShop.address,
+                    deliveryLocation = updatedShop.deliveryLocation,
+                    landmark = updatedShop.landmark
+                )
+            )
             shopDao.update(updatedShop)
             currentShop = updatedShop
             _uiState.value = EditProfileUiState.SaveSuccess

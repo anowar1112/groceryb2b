@@ -25,4 +25,16 @@ object DatabaseMigrations {
             database.execSQL("CREATE INDEX IF NOT EXISTS `index_order_items_orderId` ON `order_items` (`orderId`)")
         }
     }
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE `orders` ADD COLUMN `remoteId` TEXT")
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_orders_remoteId` ON `orders` (`remoteId`)")
+        }
+    }
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(database: SupportSQLiteDatabase) {
+            database.execSQL("ALTER TABLE `orders` ADD COLUMN `clientSyncId` TEXT")
+            database.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_orders_clientSyncId` ON `orders` (`clientSyncId`)")
+        }
+    }
 }

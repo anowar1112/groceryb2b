@@ -2,6 +2,7 @@ package com.groceryb2b.feature.home.presentation.admin.orders
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import com.groceryb2b.core.database.order.OrderWithShop
 import com.groceryb2b.feature.home.data.OrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,8 @@ import javax.inject.Inject
 data class AdminOrderUiState(
     val orders: List<OrderWithShop> = emptyList(),
     val isLoading: Boolean = true,
-    val selectedStatus: String? = null
+    val selectedStatus: String? = null,
+    val errorMessage: String? = null
 )
 
 @HiltViewModel
@@ -25,17 +27,20 @@ class AdminOrderManagementViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val selectedStatus = MutableStateFlow<String?>(null)
+    private val errorMessage = MutableStateFlow<String?>(null)
 
     val uiState: StateFlow<AdminOrderUiState> = combine(
         orderRepository.observeAllOrdersWithShop(),
-        selectedStatus
-    ) { orders, status ->
+        selectedStatus,
+        errorMessage
+    ) { orders, status, error ->
         val filteredOrders = if (status == null) orders else orders.filter { it.order.status == status }
         
         AdminOrderUiState(
             orders = filteredOrders,
             isLoading = false,
-            selectedStatus = status
+            selectedStatus = status,
+            errorMessage = error
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AdminOrderUiState())
 
@@ -44,6 +49,13 @@ class AdminOrderManagementViewModel @Inject constructor(
     }
 
     fun updateOrderStatus(orderId: Long, newStatus: String) = viewModelScope.launch {
-        orderRepository.updateOrderStatus(orderId, newStatus)
+        errorMessage.value = null
+        try {
+            orderRepository.updateOrderStatus(orderId, newStatus)
+        } catch (error: CancellationException) {
+            throw error
+        } catch (error: Exception) {
+            errorMessage.value = error.message ?: "অর্ডারের অবস্থা আপডেট করা যায়নি"
+        }
     }
 }

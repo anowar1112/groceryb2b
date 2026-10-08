@@ -69,9 +69,14 @@ GroceryB2B is a modern, offline-first Android application designed for B2B groce
 ---
 
 ## 📝 Notes & Security
-*   **Offline First:** Currently, all data is stored locally using Room. A backend sync implementation is planned for future versions.
-*   **Super Admin:** The mobile number `01557775958` is hardcoded with full authority to manage the system.
-*   **Local Verification:** The OTP code `000000` is used for demonstration purposes in this MVP.
+*   **Offline First:** Room remains the local store; order and shop-profile changes sync to Supabase when available.
+*   **Admin Access:** The app's local admin UI flag is not trusted by Supabase. Server access requires a provisioned `public.admin_users` entry.
+*   **Test Verification:** The OTP code `000000` is available only in debug builds. Release builds reject sign-in until a real OTP provider is configured.
+
+### Supabase Setup
+*   Apply the SQL files in `supabase/migrations` in filename order.
+*   After creating a trusted admin Auth user, add its UUID to `public.admin_users` in the Supabase SQL editor. Admin order reads and status updates are denied until this server-side provisioning is done.
+*   Product inventory editing remains local-only; do not treat Room product changes as synced to Supabase.
 
 ---
 

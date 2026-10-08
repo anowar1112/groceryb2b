@@ -2,6 +2,7 @@ package com.groceryb2b.feature.home.presentation.catalog
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import android.util.Log
 import com.groceryb2b.core.database.catalog.CategoryEntity
 import com.groceryb2b.core.database.catalog.ProductEntity
 import com.groceryb2b.core.database.cart.CartDao
@@ -10,6 +11,7 @@ import com.groceryb2b.core.database.shop.ShopDao
 import com.groceryb2b.core.database.shop.ShopEntity
 import com.groceryb2b.core.network.SessionManager
 import com.groceryb2b.feature.home.data.CatalogRepository
+import com.groceryb2b.feature.home.data.OrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,6 +19,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -33,6 +37,7 @@ data class HomeUiState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: CatalogRepository,
+    private val orderRepository: OrderRepository,
     private val cartDao: CartDao,
     private val sessionManager: SessionManager,
     private val shopDao: ShopDao
@@ -72,7 +77,19 @@ class HomeViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
     init {
-        viewModelScope.launch { repository.ensureSeedData() }
+        viewModelScope.launch {
+            repository.ensureSeedData()
+            while (true) {
+                try {
+                    orderRepository.syncRemoteOrders()
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    Log.w("HomeViewModel", "Order sync failed", error)
+                }
+                delay(60_000L)
+            }
+        }
     }
 
     fun updateQuery(value: String) {

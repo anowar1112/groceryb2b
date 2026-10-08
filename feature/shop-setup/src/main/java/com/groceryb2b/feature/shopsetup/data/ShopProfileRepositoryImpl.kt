@@ -4,6 +4,8 @@ import com.groceryb2b.core.common.Result
 import com.groceryb2b.core.database.shop.ShopDao
 import com.groceryb2b.core.database.shop.ShopEntity
 import com.groceryb2b.core.network.SessionManager
+import com.groceryb2b.core.network.CreateRemoteShopDto
+import com.groceryb2b.core.network.SupabaseShopApi
 import com.groceryb2b.feature.shopsetup.domain.ShopProfile
 import com.groceryb2b.feature.shopsetup.domain.ShopProfileRepository
 import android.database.sqlite.SQLiteConstraintException
@@ -11,9 +13,20 @@ import javax.inject.Inject
 
 class ShopProfileRepositoryImpl @Inject constructor(
     private val shopDao: ShopDao,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val shopApi: SupabaseShopApi
 ) : ShopProfileRepository {
     override suspend fun createProfile(profile: ShopProfile): Result<String> = try {
+        shopApi.create(
+            CreateRemoteShopDto(
+                shopName = profile.shopName,
+                ownerName = profile.ownerName,
+                mobileNumber = profile.mobileNumber,
+                address = profile.address,
+                deliveryLocation = profile.deliveryLocation,
+                landmark = profile.landmark
+            )
+        )
         val shopId = shopDao.insert(
             ShopEntity(
                 shopName = profile.shopName,
