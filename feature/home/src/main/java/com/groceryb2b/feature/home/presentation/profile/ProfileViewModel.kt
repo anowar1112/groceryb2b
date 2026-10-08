@@ -1,5 +1,6 @@
 package com.groceryb2b.feature.home.presentation.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.groceryb2b.core.database.shop.ShopDao
@@ -9,6 +10,7 @@ import com.groceryb2b.feature.home.data.OrderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import com.groceryb2b.core.database.order.OrderEntity
 import javax.inject.Inject
@@ -42,6 +44,14 @@ class ProfileViewModel @Inject constructor(
         try {
             val shop = shopDao.findByMobileNumber(sessionManager.mobileNumber.orEmpty())
                 ?: return@launch
+
+            try {
+                orderRepository.syncRemoteOrders()
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.w("ProfileViewModel", "Order history sync failed", error)
+            }
             
             // Collect orders from flow
             orderRepository.observeOrdersByShop(shopId).collect { orders ->
