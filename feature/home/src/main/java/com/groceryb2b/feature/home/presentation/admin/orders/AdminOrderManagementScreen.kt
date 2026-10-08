@@ -220,7 +220,7 @@ private fun AdminOrderCard(
             }
             
             Text(
-                text = "মোবাইল: ${order.shopId}",
+                text = "মোবাইল: ${shop?.mobileNumber ?: order.shopMobileNumber}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 26.dp)
